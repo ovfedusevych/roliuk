@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Valentine 💘</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass card */
+.card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 24px;
+  padding: 32px 28px 36px;
+  max-width: 380px;
+  width: calc(100% - 32px);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+/* Text */
+h1 {
+  font-size: 22px;
+  margin: 0 0 18px;
+  color: #2c2c2c;
+  line-height: 1.35;
+}
+
+/* Success gif */
+.success-gif {
+  display: none;
+  width: 100%;
+  max-width: 300px;
+  border-radius: 16px;
+  margin: 20px auto;
+}
+
+.success-gif.show {
+  display: block;
+  animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Buttons */
+.buttons {
+  position: relative;
+  min-height: 120px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+button {
+  font-size: 16px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#yes {
+  background: #2ecc71;
+  color: white;
+  animation: yesPulse 1.4s ease-in-out infinite;
+}
+
+#yes.intense-pulse {
+  animation: yesIntensePulse 0.6s ease-in-out infinite;
+}
+
+@keyframes yesPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes yesIntensePulse {
+  0%,100% { transform: scale(2); }
+  50% { transform: scale(3); }
+}
+
+/* No button (absolute from the start to avoid layout jumps) */
+#no {
+  background: #e74c3c;
+  color: white;
+  position: absolute;
+  left: 62%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  touch-action: none; /* helps pointer events on mobile */
+}
+
+/* Beer rain */
+.beers {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.beer {
+  position: absolute;
+  top: -40px;
+  font-size: 26px;
+  animation: beerFall linear forwards;
+}
+
+@keyframes beerFall {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0.9; }
+}
+</style>
+</head>
+
+<body>
+<div class="beers" id="beers"></div>
+
+<div class="card">
+  <h1>
+    Andriy or maybe… Pundyk!<br>
+    Would you be my Valentine? ❤️
+  </h1>
+
+  <img src="giphy-downsized.gif" alt="Success!" class="success-gif" id="successGif">
+
+  <div class="buttons" id="buttonsContainer">
+    <button id="yes" onclick="sayYes()">Yes</button>
+    <button id="no">No</button>
+  </div>
+</div>
+
+<script>
+const noBtn = document.getElementById("no");
+const beersWrap = document.getElementById("beers");
+const yesBtn = document.getElementById("yes");
+
+let started = false;
+
+function moveNoAwayFromPointer(ev) {
+  if (!started) {
+    started = true;
+    yesBtn.classList.add("intense-pulse");
+  }
+
+  const container = noBtn.parentElement.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+  const yesRect = yesBtn.getBoundingClientRect();
+
+  const cursorX = ev.clientX - container.left;
+  const cursorY = ev.clientY - container.top;
+
+  const btnCenterX = (btnRect.left - container.left) + btnRect.width / 2;
+  const btnCenterY = (btnRect.top - container.top) + btnRect.height / 2;
+
+  const deltaX = btnCenterX - cursorX;
+  const deltaY = btnCenterY - cursorY;
+  const distance = Math.hypot(deltaX, deltaY);
+  if (distance === 0) return;
+
+  const moveDistance = 150;
+  const newCenterX = btnCenterX + (deltaX / distance) * moveDistance;
+  const newCenterY = btnCenterY + (deltaY / distance) * moveDistance;
+
+  let newX = newCenterX - btnRect.width / 2;
+  let newY = newCenterY - btnRect.height / 2;
+
+  newX = Math.max(0, Math.min(newX, container.width - btnRect.width));
+  newY = Math.max(0, Math.min(newY, container.height - btnRect.height));
+
+  // keep away from YES
+  const yesCenterX = (yesRect.left - container.left) + yesRect.width / 2;
+  const yesCenterY = (yesRect.top - container.top) + yesRect.height / 2;
+
+  const checkCenterX = newX + btnRect.width / 2;
+  const checkCenterY = newY + btnRect.height / 2;
+
+  const minDistance = 120;
+  const distFromYes = Math.hypot(checkCenterX - yesCenterX, checkCenterY - yesCenterY);
+
+  if (distFromYes < minDistance) {
+    const awayX = checkCenterX - yesCenterX;
+    const awayY = checkCenterY - yesCenterY;
+    const d = Math.hypot(awayX, awayY) || 1;
+
+    newX = yesCenterX + (awayX / d) * minDistance - btnRect.width / 2;
+    newY = yesCenterY + (awayY / d) * minDistance - btnRect.height / 2;
+
+    newX = Math.max(0, Math.min(newX, container.width - btnRect.width));
+    newY = Math.max(0, Math.min(newY, container.height - btnRect.height));
+  }
+
+  noBtn.style.left = newX + "px";
+  noBtn.style.top = newY + "px";
+}
+
+// Pointer events = стабільно для миші та мобільних
+noBtn.addEventListener("pointerenter", moveNoAwayFromPointer);
+noBtn.addEventListener("pointermove", moveNoAwayFromPointer);
+noBtn.addEventListener("pointerdown", moveNoAwayFromPointer);
+
+noBtn.addEventListener("pointerleave", () => {
+  yesBtn.classList.remove("intense-pulse");
+  started = false;
+});
+
+function dropBeer() {
+  const beer = document.createElement("div");
+  beer.className = "beer";
+  beer.textContent = "🍺";
+  beer.style.left = Math.random() * window.innerWidth + "px";
+  beer.style.animationDuration = (2.5 + Math.random() * 2) + "s";
+  beersWrap.appendChild(beer);
+  setTimeout(() => beer.remove(), 5000);
+}
+
+function sayYes() {
+  const successGif = document.getElementById("successGif");
+  const buttonsContainer = document.getElementById("buttonsContainer");
+
+  successGif.classList.add("show");
+  buttonsContainer.style.display = "none";
+
+  for (let i = 0; i < 40; i++) {
+    setTimeout(dropBeer, i * 120);
+  }
+}
+</script>
+</body>
+</html>
